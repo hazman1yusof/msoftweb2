@@ -492,10 +492,12 @@
 						$arrayValue = array("recno"=>$_POST['recno'], "compcode"=>$_SESSION['company']);//, "seqno2"=>$seqno);
 						$this->save($prepare, $arrayValue);
 
-						$sql="SELECT dt.itemcode, dt.uomcode, p.groupcode FROM material.delorddt dt LEFT JOIN material.product p
+						$sql="SELECT dt.itemcode, dt.uomcode, p.groupcode, p.productcat FROM material.delorddt dt LEFT JOIN material.product p
 						ON dt.itemcode=p.itemcode AND dt.uomcode=p.uomcode WHERE dt.compcode = '{$this->compcode}' and p.groupcode='Stock' and dt.recno='".$recno."'";
 
 						$result = $this->db->query($sql);
+						$row = $result->fetch(PDO::FETCH_ASSOC);
+						$productcat_ = $row['productcat'];
 						//echo $sql;
 						if(!$result){throw new Exception("error: ".$this->db->errorInfo()[2]);}
 
@@ -540,7 +542,7 @@
 									$row['adddate'],
 									$row['upduser'],
 									$row['upddate'],
-									$row['productcat'],
+									$productcat_,
 									$row['draccno'],
 									$row['drccode'],
 									$row['craccno'],
@@ -568,7 +570,7 @@
 								StockLoc.Year     = YEAR('{$row['trandate']}') AND
 								StockLoc.UomCode  = '{$row['uomcode']}'";
 
-							echo $query_sloc;
+							// echo $query_sloc;
 
 							$result_sloc = $this->db->query($query_sloc);if (!$result_sloc) { print_r($this->db->errorInfo()); }
 							$resultarr_sloc = $result_sloc->fetch(PDO::FETCH_ASSOC);
@@ -592,7 +594,7 @@
 										StockLoc.ItemCode = '{$row['itemcode']}' AND
 										StockLoc.Year     = YEAR('{$row['trandate']}') AND
 										StockLoc.UomCode  = '{$row['uomcode']}'";
-								echo $query_sloc;
+								// echo $query_sloc;
 								$result_sloc = $this->db->query($query_sloc);
 								if(!$result_sloc){throw new Exception("error: ".$this->db->errorInfo()[2]);}
 
@@ -609,7 +611,7 @@
 								stockexp.year = YEAR('{$row['trandate']}') AND
 								stockexp.uomcode  = '{$row['uomcode']}'";
 
-							echo $query_stockexp;
+							// echo $query_stockexp;
 
 							$result_stockexp = $this->db->query($query_stockexp);if (!$result_stockexp) { print_r($this->db->errorInfo()); }
 							$resultarr_stockexp = $result_stockexp->fetch(PDO::FETCH_ASSOC);
@@ -631,7 +633,7 @@
 										stockexp.lasttt = 'GRN' AND
 										stockexp.year = YEAR('{$row['trandate']}') ";
 
-								echo $query_stockexp;
+								// echo $query_stockexp;
 								$result_stockexp = $this->db->query($query_stockexp);
 								if(!$result_stockexp){throw new Exception("error: ".$this->db->errorInfo()[2]);}
 
@@ -660,7 +662,7 @@
 										'GRN',
 										$row['trandate']);
 
-								echo $this->readableSyntax($prepare,$arrayValue);
+								// echo $this->readableSyntax($prepare,$arrayValue);
 								$this->save($prepare, $arrayValue);
 								
 							}
@@ -672,7 +674,7 @@
 								product.itemcode = '{$row['itemcode']}' AND
 								product.uomcode = '{$row['uomcode']}'";
 
-							echo $query_product;
+							// echo $query_product;
 
 							$result_product = $this->db->query($query_product);if (!$result_product) { print_r($this->db->errorInfo()); }
 							$resultarr_product = $result_product->fetch(PDO::FETCH_ASSOC);
@@ -698,7 +700,7 @@
 										product.itemcode = '{$row['itemcode']}' AND
 										product.uomcode = '{$row['uomcode']}'";
 
-								echo $query_product;
+								// echo $query_product;
 								$result_product = $this->db->query($query_product);
 								if(!$result_product){throw new Exception("error: ".$this->db->errorInfo()[2]);}
 
@@ -726,7 +728,7 @@
 							$sql="SELECT * from material.category 
 								WHERE 
 									compcode = '{$_SESSION['company']}' AND 
-									catcode = '{$row['productcat']}'";
+									catcode = '{$productcat_}'";
 							$result = $this->db->query($sql);
 							if(!$result){throw new Exception("error: ".$this->db->errorInfo()[2]);}
 							$row_cat = $result->fetch(PDO::FETCH_ASSOC);
@@ -741,8 +743,8 @@
 							$row_sysparam = $result->fetch(PDO::FETCH_ASSOC);
 
 							$prepare="INSERT INTO finance.gltran
-								 (compcode','adduser','adddate','auditno','lineno_','source','trantype','reference','description','postdate','year','period','drcostcode','dracc','crcostcode','cracc','amount','idno') VALUES 
-								 (?, ? NOW(), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+								 (compcode,adduser,adddate,auditno,lineno_,source,trantype,reference,description,postdate,year,period,drcostcode,dracc,crcostcode,cracc,amount,idno) VALUES 
+								 (?, ?, NOW(), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 							$arrayValue = array(
 									$row['compcode'],
 									$row['adduser'],
@@ -763,7 +765,7 @@
 									$row['itemcode'],
 									);
 
-							// echo $this->readableSyntax($prepare,$arrayValue);
+							echo $this->readableSyntax($prepare,$arrayValue);
 							$this->save($prepare, $arrayValue);
 
 
@@ -854,7 +856,7 @@
 										trantype = 'BS'";
 								$result = $this->db->query($sql);
 								if(!$result){throw new Exception("error: ".$this->db->errorInfo()[2]);}
-								$queryGSTBS = $result->fetch(PDO::FETCH_ASSOC);\
+								$queryGSTBS = $result->fetch(PDO::FETCH_ASSOC);
 
 								$sql="SELECT * from sysdb.sysparam 
 									WHERE 
@@ -891,8 +893,8 @@
 								}
 
 								$prepare="INSERT INTO finance.gltran
-									 (compcode','adduser','adddate','auditno','lineno_','source','trantype','reference','description','postdate','year','period','drcostcode','dracc','crcostcode','cracc','amount','idno') VALUES 
-									 (?, ? NOW(), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+									 (compcode,adduser,adddate,auditno,lineno_,source,trantype,reference,description,postdate,year,period,drcostcode,dracc,crcostcode,cracc,amount,idno) VALUES 
+									 (?, ?, NOW(), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 								$arrayValue = array(
 										$row['compcode'],
 										$row['adduser'],
@@ -909,7 +911,7 @@
 										$dracc_,
 										$queryACC['pvalue1'],
 										$queryACC['pvalue2'],
-										$row['amount'],
+										$row['amtslstax'],
 										$row['itemcode'],
 										);
 
